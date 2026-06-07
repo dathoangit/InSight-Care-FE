@@ -1,0 +1,9 @@
+services:
+  frontend:
+    build:
+      context: .
+    env_file:
+      - .env
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    restart: always
