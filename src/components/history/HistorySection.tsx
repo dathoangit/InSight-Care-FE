@@ -1,8 +1,14 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { createAuthenticatedApi } from 'src/api/authenticated';
-import { type BedTodayStatus } from 'src/components/records/types';
-import { getTodayYmdVN } from 'src/utils/date-vn';
+import { EnteredByLine } from 'src/components/records/EnteredByLine';
+import {
+  formatBp,
+  formatNote,
+  formatPulse,
+  formatTemp,
+} from 'src/components/records/format-vitals';
+import { type BedTodayStatus, type RecordEnteredBy } from 'src/components/records/types';
 import { formatPatientName } from 'src/utils/format-patient-name';
 
 import { getHistory } from './api';
@@ -11,32 +17,76 @@ import { type DailyRecord } from './types';
 type HistorySectionProps = {
   token: string | null;
   beds: BedTodayStatus[];
+  serverDate: string;
+  onPatientClick?: (
+    bedId: string,
+    patientName: string,
+    anchorDate: string,
+  ) => void;
 };
 
-function formatShiftCell(
-  patientName: string | null,
-  pulse: number | null,
-  temp: number | null,
-  bp: string | null,
-): string {
-  const parts: string[] = [];
+function HistoryShiftCell({
+  patientName,
+  pulse,
+  temp,
+  bp,
+  note,
+  enteredBy,
+  bedId,
+  anchorDate,
+  onPatientClick,
+}: {
+  patientName: string | null;
+  pulse: number | null;
+  temp: number | null;
+  bp: string | null;
+  note: string | null;
+  enteredBy: RecordEnteredBy | null;
+  bedId: string;
+  anchorDate: string;
+  onPatientClick?: (
+    bedId: string,
+    patientName: string,
+    anchorDate: string,
+  ) => void;
+}) {
   const name = patientName?.trim();
+  const hasData =
+    Boolean(name) ||
+    pulse !== null ||
+    temp !== null ||
+    Boolean(bp?.trim()) ||
+    Boolean(note?.trim());
 
-  if (name) {
-    parts.push(formatPatientName(name));
-  }
-
-  if (pulse !== null) {
-    parts.push(`Mạch ${pulse}`);
-  }
-  if (temp !== null) {
-    parts.push(`${temp}°C`);
-  }
-  if (bp) {
-    parts.push(bp);
+  if (!hasData) {
+    return <span className="text-slate-300">—</span>;
   }
 
-  return parts.length > 0 ? parts.join(' · ') : '—';
+  return (
+    <div className="min-w-[8rem] space-y-1">
+      {name ? (
+        onPatientClick ? (
+          <button
+            type="button"
+            onClick={() => onPatientClick(bedId, name, anchorDate)}
+            className="text-left text-sm font-medium text-blue-600 hover:text-blue-800">
+            {formatPatientName(name)}
+          </button>
+        ) : (
+          <p className="font-medium text-slate-800">{formatPatientName(name)}</p>
+        )
+      ) : null}
+      <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-slate-700">
+        {pulse !== null ? <span>Mạch {formatPulse(pulse)}</span> : null}
+        {temp !== null ? <span>{formatTemp(temp)}°C</span> : null}
+        {bp ? <span>{formatBp(bp)}</span> : null}
+      </div>
+      {note?.trim() ? (
+        <p className="text-xs italic text-slate-600">{formatNote(note)}</p>
+      ) : null}
+      <EnteredByLine enteredBy={enteredBy} />
+    </div>
+  );
 }
 
 function getBedLabel(bedId: string, beds: BedTodayStatus[]): string {
@@ -48,11 +98,24 @@ function getBedLabel(bedId: string, beds: BedTodayStatus[]): string {
   return `${bed.bedName} (T${bed.floor} P${bed.roomName})`;
 }
 
-export function HistorySection({ token, beds }: HistorySectionProps) {
-  const today = getTodayYmdVN();
+export function HistorySection({
+  token,
+  beds,
+  serverDate,
+  onPatientClick,
+}: HistorySectionProps) {
   const [expanded, setExpanded] = useState(false);
-  const [startDate, setStartDate] = useState(today);
-  const [endDate, setEndDate] = useState(today);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+
+  useEffect(() => {
+    if (!serverDate) {
+      return;
+    }
+
+    setStartDate((current) => current || serverDate);
+    setEndDate((current) => current || serverDate);
+  }, [serverDate]);
   const [patientName, setPatientName] = useState('');
   const [bedId, setBedId] = useState('');
   const [records, setRecords] = useState<DailyRecord[]>([]);
@@ -246,20 +309,30 @@ export function HistorySection({ token, beds }: HistorySectionProps) {
                           {getBedLabel(record.bedId, beds)}
                         </td>
                         <td className="px-1 py-1.5 sm:px-2 sm:py-2">
-                          {formatShiftCell(
-                            record.morningPatientName,
-                            record.morningPulse,
-                            record.morningTemp,
-                            record.morningBp,
-                          )}
+                          <HistoryShiftCell
+                            patientName={record.morningPatientName}
+                            pulse={record.morningPulse}
+                            temp={record.morningTemp}
+                            bp={record.morningBp}
+                            note={record.morningNote}
+                            enteredBy={record.morningEnteredBy}
+                            bedId={record.bedId}
+                            anchorDate={record.date}
+                            onPatientClick={onPatientClick}
+                          />
                         </td>
                         <td className="px-1 py-1.5 sm:px-2 sm:py-2">
-                          {formatShiftCell(
-                            record.eveningPatientName,
-                            record.eveningPulse,
-                            record.eveningTemp,
-                            record.eveningBp,
-                          )}
+                          <HistoryShiftCell
+                            patientName={record.eveningPatientName}
+                            pulse={record.eveningPulse}
+                            temp={record.eveningTemp}
+                            bp={record.eveningBp}
+                            note={record.eveningNote}
+                            enteredBy={record.eveningEnteredBy}
+                            bedId={record.bedId}
+                            anchorDate={record.date}
+                            onPatientClick={onPatientClick}
+                          />
                         </td>
                         <td className="px-1 py-1.5 sm:px-2 sm:py-2">
                           {record.isLocked ? 'Có' : 'Không'}

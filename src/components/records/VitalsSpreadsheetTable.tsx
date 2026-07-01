@@ -4,49 +4,72 @@ import { type BedTodayStatus } from './types';
 import { VitalsTableRow } from './VitalsTableRow';
 
 const COLUMN_HEADERS = [
-  { full: 'Phòng', short: 'P' },
-  { full: 'Tên NB', short: 'Tên' },
+  { full: 'Giường', short: 'G' },
+  { full: 'Họ và tên', short: 'Họ và tên' },
   { full: 'Mạch', short: 'M' },
   { full: 'Nhiệt độ', short: 'NĐ' },
-  { full: 'HA', short: 'HA' },
+  { full: 'Huyết áp', short: 'HA' },
+  { full: 'Ghi chú', short: 'Note' },
 ] as const;
 
 type VitalsSpreadsheetTableProps = {
   beds: BedTodayStatus[];
+  editableShift: VitalsShift;
+  anchorDate: string;
   onCellClick: (bedId: string, shift: VitalsShift) => void;
+  onPatientClick: (bedId: string, patientName: string, anchorDate: string) => void;
+  readOnly?: boolean;
 };
 
 type ShiftTableProps = {
   shift: VitalsShift;
   label: string;
   beds: BedTodayStatus[];
+  editableShift: VitalsShift;
+  anchorDate: string;
   onCellClick: (bedId: string, shift: VitalsShift) => void;
+  onPatientClick: (bedId: string, patientName: string, anchorDate: string) => void;
+  readOnly?: boolean;
 };
 
-function ShiftTable({ shift, label, beds, onCellClick }: ShiftTableProps) {
+function ShiftTable({
+  shift,
+  label,
+  beds,
+  editableShift,
+  anchorDate,
+  onCellClick,
+  onPatientClick,
+  readOnly,
+}: ShiftTableProps) {
   return (
     <div className="w-full touch-manipulation">
-      <table className="w-full table-fixed border-collapse border border-black text-center text-[10px] leading-tight sm:text-xs">
+      <table className="w-full table-fixed border-collapse text-center text-[10px] leading-tight sm:text-xs">
         <colgroup>
-          <col className="w-[20%]" />
+          <col className="w-[10%]" />
           <col className="w-[24%]" />
+          <col className="w-[10%]" />
           <col className="w-[12%]" />
-          <col className="w-[14%]" />
-          <col className="w-[14%]" />
+          <col className="w-[12%]" />
+          <col className="w-[16%]" />
         </colgroup>
-        <thead className="bg-slate-100">
+        <thead className="bg-gray-100">
           <tr>
             <th
-              colSpan={5}
-              className="border border-black px-0.5 py-1 font-bold text-slate-900 sm:px-1 sm:py-1.5">
+              colSpan={6}
+              className="border-b border-gray-200 px-0.5 py-1 text-sm font-bold text-gray-600 sm:px-1 sm:py-1.5">
               {label}
             </th>
           </tr>
           <tr>
-            {COLUMN_HEADERS.map((header) => (
+            {COLUMN_HEADERS.map((header, index) => (
               <th
                 key={`${shift}-${header.full}`}
-                className="border border-black px-0.5 py-0.5 font-semibold text-slate-700 sm:px-1 sm:py-1">
+                className={`border-b border-gray-200 py-0.5 font-semibold text-gray-600 sm:py-1 ${
+                  index === COLUMN_HEADERS.length - 1
+                    ? 'px-2 sm:px-3'
+                    : 'px-0.5 sm:px-1'
+                }`}>
                 <span className="sm:hidden">{header.short}</span>
                 <span className="hidden sm:inline">{header.full}</span>
               </th>
@@ -54,12 +77,17 @@ function ShiftTable({ shift, label, beds, onCellClick }: ShiftTableProps) {
           </tr>
         </thead>
         <tbody>
-          {beds.map((bed) => (
+          {beds.map((bed, rowIndex) => (
             <VitalsTableRow
               key={`${shift}-${bed.bedId}`}
               bed={bed}
               shift={shift}
+              editableShift={editableShift}
+              anchorDate={anchorDate}
+              rowIndex={rowIndex}
               onCellClick={onCellClick}
+              onPatientClick={onPatientClick}
+              readOnly={readOnly}
             />
           ))}
         </tbody>
@@ -70,7 +98,11 @@ function ShiftTable({ shift, label, beds, onCellClick }: ShiftTableProps) {
 
 export function VitalsSpreadsheetTable({
   beds,
+  editableShift,
+  anchorDate,
   onCellClick,
+  onPatientClick,
+  readOnly = false,
 }: VitalsSpreadsheetTableProps) {
   if (beds.length === 0) {
     return (
@@ -86,13 +118,21 @@ export function VitalsSpreadsheetTable({
         shift="morning"
         label="Sáng"
         beds={beds}
+        editableShift={editableShift}
+        anchorDate={anchorDate}
         onCellClick={onCellClick}
+        onPatientClick={onPatientClick}
+        readOnly={readOnly}
       />
       <ShiftTable
         shift="evening"
         label="Chiều"
         beds={beds}
+        editableShift={editableShift}
+        anchorDate={anchorDate}
         onCellClick={onCellClick}
+        onPatientClick={onPatientClick}
+        readOnly={readOnly}
       />
     </div>
   );

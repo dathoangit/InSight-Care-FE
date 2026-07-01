@@ -4,6 +4,9 @@ import { useState, type FormEvent } from 'react';
 import { useAuth } from 'src/auth/context';
 import { getDefaultLandingPath } from 'src/auth/role-routing';
 import { APP_BRAND_SHORT_NAME, APP_ORG_NAME } from 'src/constants/branding';
+import { ApiError } from 'src/utils/api';
+
+const INVALID_CREDENTIALS_MESSAGE = 'Sai tên đăng nhập hoặc mật khẩu.';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,17 +14,19 @@ export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     const normalizedUsername = username.trim().toLowerCase();
     if (!normalizedUsername || !password.trim()) {
-      console.warn('[login] Missing username or password.');
+      setError(INVALID_CREDENTIALS_MESSAGE);
       return;
     }
 
     setPending(true);
+    setError(null);
     try {
       const me = await login({
         username: normalizedUsername,
@@ -29,7 +34,13 @@ export default function LoginPage() {
       });
       await router.replace(getDefaultLandingPath(me.role));
     } catch (err) {
+      if (err instanceof ApiError && err.status === 401) {
+        setError(INVALID_CREDENTIALS_MESSAGE);
+        return;
+      }
+
       console.error('[login] Login request failed.', err);
+      setError('Không thể đăng nhập. Vui lòng thử lại sau.');
     } finally {
       setPending(false);
     }
@@ -52,6 +63,14 @@ export default function LoginPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+            {error ? (
+              <div
+                role="alert"
+                className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                {error}
+              </div>
+            ) : null}
+
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-slate-700">
                 Tên đăng nhập

@@ -47,6 +47,21 @@ export function formatTodayYmdDisplay(reference = new Date()): string {
   }).format(reference);
 }
 
+/** `YYYY-MM-DD` → `DD/MM/YYYY` for display (VN calendar date string). */
+export function formatYmdDisplay(dateYmd: string): string {
+  const [year, month, day] = dateYmd.split('-').map(Number);
+  if (!year || !month || !day) {
+    return dateYmd;
+  }
+
+  return new Intl.DateTimeFormat('vi-VN', {
+    timeZone: VN_TIMEZONE,
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(new Date(Date.UTC(year, month - 1, day)));
+}
+
 /**
  * Local calendar date for `<input type="date">` and display helpers for API ISO strings.
  * Display uses the browser's default timezone ("machine" local time).

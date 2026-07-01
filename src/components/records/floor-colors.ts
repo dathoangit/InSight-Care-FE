@@ -1,13 +1,3 @@
-export function getFloorRowClass(floor: number): string {
-  switch (floor) {
-    case 2:
-    case 5:
-      return 'bg-sky-50';
-    case 3:
-      return 'bg-amber-50';
-    case 4:
-      return 'bg-pink-50';
-    default:
-      return 'bg-white';
-  }
+export function getZebraRowClass(rowIndex: number): string {
+  return rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50';
 }

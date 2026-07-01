@@ -12,11 +12,13 @@ type VitalsShiftFieldsProps = {
   pulse: string;
   temp: string;
   bp: string;
+  note: string;
   disabled: boolean;
   errors: VitalsFieldErrors;
   onPulseChange: (value: string) => void;
   onTempChange: (value: string) => void;
   onBpChange: (value: string) => void;
+  onNoteChange: (value: string) => void;
 };
 
 function FieldError({ message }: { message?: string }) {
@@ -32,11 +34,13 @@ export function VitalsShiftFields({
   pulse,
   temp,
   bp,
+  note,
   disabled,
   errors,
   onPulseChange,
   onTempChange,
   onBpChange,
+  onNoteChange,
 }: VitalsShiftFieldsProps) {
   const pulseIsZero = parsePulseValue(pulse) === 0;
   const bpDisabled = disabled || pulseIsZero;
@@ -108,6 +112,23 @@ export function VitalsShiftFields({
             : 'Tâm thu 40–300, tâm trương 20–200 mmHg; tâm thu > tâm trương.'}
         </p>
         <FieldError message={errors.bp} />
+      </div>
+
+      <div>
+        <label htmlFor={`${idPrefix}-note`} className="block text-sm font-medium text-slate-700">
+          Ghi chú
+        </label>
+        <textarea
+          id={`${idPrefix}-note`}
+          rows={3}
+          maxLength={500}
+          value={note}
+          disabled={disabled}
+          placeholder="VD: Theo dõi sốt, đau ngực nhẹ..."
+          onChange={(event) => onNoteChange(event.target.value)}
+          className="mt-1 w-full resize-y rounded-lg border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-100"
+        />
+        <p className="mt-1 text-xs text-slate-500">Tùy chọn, tối đa 500 ký tự.</p>
       </div>
     </>
   );

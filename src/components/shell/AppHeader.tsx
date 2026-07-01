@@ -21,7 +21,7 @@ export function AppHeader() {
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-2 px-3 py-2.5 sm:gap-3 sm:px-6 sm:py-3">
         <Link
           href={HOME_PATH}
-          className="inline-flex min-w-0 flex-1 items-center gap-2.5 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-red-700 sm:gap-3">
+          className="inline-flex min-w-0 flex-1 items-center gap-2.5 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-red-800 sm:gap-3">
           <Image
             src={APP_LOGO_SRC}
             alt=""

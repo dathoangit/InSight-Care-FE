@@ -2,11 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 
 import {
   formatIsoAsLocalDateTime,
-  formatTodayYmdDisplay,
-  getEditableShift,
+  formatYmdDisplay,
   type VitalsShift,
 } from 'src/utils/date-vn';
 
+import { exportVitalsToXlsx } from './export-vitals-xlsx';
 import { FloorTabs } from './FloorTabs';
 import { type BedTodayStatus } from './types';
 import { VitalsSpreadsheetTable } from './VitalsSpreadsheetTable';
@@ -16,7 +16,17 @@ type TodayStatusSectionProps = {
   isLoading: boolean;
   error: string | null;
   lastUpdatedAt: Date | null;
+  selectedDate: string;
+  serverDate: string;
+  editableShift: VitalsShift;
+  onSelectedDateChange: (date: string) => void;
+  readOnly?: boolean;
   onCellClick: (bedId: string, shift: VitalsShift) => void;
+  onPatientClick: (
+    bedId: string,
+    patientName: string,
+    anchorDate: string,
+  ) => void;
 };
 
 export function TodayStatusSection({
@@ -24,8 +34,17 @@ export function TodayStatusSection({
   isLoading,
   error,
   lastUpdatedAt,
+  selectedDate,
+  serverDate,
+  editableShift,
+  onSelectedDateChange,
+  readOnly = false,
   onCellClick,
+  onPatientClick,
 }: TodayStatusSectionProps) {
+  const dateDisplay = selectedDate ? formatYmdDisplay(selectedDate) : '—';
+  const shiftLabel =
+    editableShift === 'morning' ? 'Sáng (0h–11h59)' : 'Chiều (12h–23h59)';
   const floors = useMemo(
     () =>
       Array.from(new Set(data.map((bed) => bed.floor))).sort((a, b) => a - b),
@@ -45,16 +64,6 @@ export function TodayStatusSection({
     }
   }, [floors, activeFloor]);
 
-  const bedCountByFloor = useMemo(() => {
-    const counts: Record<number, number> = {};
-
-    for (const bed of data) {
-      counts[bed.floor] = (counts[bed.floor] ?? 0) + 1;
-    }
-
-    return counts;
-  }, [data]);
-
   const bedsOnFloor = useMemo(
     () =>
       activeFloor === null
@@ -63,31 +72,47 @@ export function TodayStatusSection({
     [data, activeFloor],
   );
 
-  const editableShift = getEditableShift();
-  const shiftLabel = editableShift === 'morning' ? 'Sáng (0h–11h59)' : 'Chiều (12h–23h59)';
-
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-2 shadow-sm sm:p-4">
-      <div className="text-center">
-        <h2 className="text-sm font-bold uppercase tracking-wide text-slate-900 sm:text-lg">
-          Bảng theo dõi dấu hiệu sinh tồn
-        </h2>
-        <p className="mt-1 text-xs text-slate-600 sm:text-sm">
-          (Từ 0h ngày {formatTodayYmdDisplay()} đến 23h59 ngày{' '}
-          {formatTodayYmdDisplay()})
-        </p>
+      <div className="mb-4 flex items-end justify-between gap-2">
+        <div className="flex items-end gap-2 sm:gap-3">
+          <div>
+            <input
+              id="vitals-date"
+              type="date"
+              value={selectedDate}
+              max={serverDate || undefined}
+              disabled={!serverDate}
+              onChange={(event) => {
+                if (event.target.value) {
+                  onSelectedDateChange(event.target.value);
+                }
+              }}
+              className="mt-1 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 disabled:cursor-not-allowed disabled:bg-slate-100"
+            />
+          </div>
+          {serverDate && selectedDate !== serverDate ? (
+            <button
+              type="button"
+              onClick={() => onSelectedDateChange(serverDate)}
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50">
+              Hôm nay
+            </button>
+          ) : null}
+        </div>
+        <button
+          type="button"
+          disabled={!selectedDate || data.length === 0}
+          onClick={() => exportVitalsToXlsx(data, selectedDate)}
+          className="shrink-0 rounded-md border border-teal-600 bg-teal-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-teal-700 disabled:cursor-not-allowed disabled:border-gray-300 disabled:bg-gray-100 disabled:text-gray-400">
+          Xuất Excel
+        </button>
       </div>
 
-      <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600 sm:mt-4 sm:gap-3 sm:text-sm">
-        <p>
-          {data.length} giường · Ca nhập hiện tại:{' '}
-          <span className="font-medium text-slate-900">{shiftLabel}</span>
-        </p>
-        {lastUpdatedAt ? (
-          <p className="text-xs text-slate-500">
-            Cập nhật lúc {formatIsoAsLocalDateTime(lastUpdatedAt.toISOString())}
-          </p>
-        ) : null}
+      <div className="text-center">
+        <h2 className="text-lg font-bold uppercase tracking-wide text-slate-900 sm:text-lg">
+          Bảng theo dõi dấu hiệu sinh tồn
+        </h2>
       </div>
 
       {error ? (
@@ -103,11 +128,17 @@ export function TodayStatusSection({
           <FloorTabs
             floors={floors}
             activeFloor={activeFloor}
-            bedCountByFloor={bedCountByFloor}
             onChange={setActiveFloor}
           />
-          <div className="border border-t-0 border-slate-300 p-0.5 sm:p-1">
-            <VitalsSpreadsheetTable beds={bedsOnFloor} onCellClick={onCellClick} />
+          <div className="rounded-b-lg border border-gray-200 border-t-0 bg-white p-0.5 sm:p-1">
+            <VitalsSpreadsheetTable
+              beds={bedsOnFloor}
+              editableShift={editableShift}
+              anchorDate={selectedDate}
+              onCellClick={onCellClick}
+              onPatientClick={onPatientClick}
+              readOnly={readOnly}
+            />
           </div>
         </div>
       ) : null}

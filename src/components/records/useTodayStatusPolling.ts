@@ -2,52 +2,71 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { createAuthenticatedApi } from 'src/api/authenticated';
 import { ApiError } from 'src/utils/api';
+import { type VitalsShift } from 'src/utils/date-vn';
 
-import { getTodayStatus } from './api';
+import { getBedStatus } from './api';
 import { type BedTodayStatus, type DailyRecord } from './types';
 
 const DEFAULT_INTERVAL_MS = 3000;
 
-type TodayStatusPollingOptions = {
+type BedStatusByDateOptions = {
+  selectedDate: string;
   intervalMs?: number;
-  /** Chỉ bật khi đang ở trang bảng vitals và tab đang hiển thị. */
   enabled?: boolean;
-  /** Tạm dừng khi modal nhập liệu đang mở. */
   paused?: boolean;
+  onServerDateChange?: (serverDate: string) => void;
 };
 
-export function useTodayStatusPolling(
+export function useBedStatusByDate(
   token: string | null,
-  options: TodayStatusPollingOptions = {},
+  options: BedStatusByDateOptions,
 ) {
   const {
+    selectedDate,
     intervalMs = DEFAULT_INTERVAL_MS,
     enabled = false,
     paused = false,
+    onServerDateChange,
   } = options;
   const [data, setData] = useState<BedTodayStatus[]>([]);
+  const [serverDate, setServerDate] = useState('');
+  const [editableShift, setEditableShift] = useState<VitalsShift>('morning');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdatedAt, setLastUpdatedAt] = useState<Date | null>(null);
   const isMountedRef = useRef(true);
-  const shouldPoll = Boolean(token && enabled && !paused);
+  const isViewingToday = Boolean(
+    serverDate && (!selectedDate || selectedDate === serverDate),
+  );
+  const shouldPoll = Boolean(token && enabled && isViewingToday && !paused);
 
   const fetchStatus = useCallback(async () => {
     if (!token || !enabled) {
       return;
     }
 
+    const viewToday = !selectedDate || selectedDate === serverDate;
+
     try {
       const api = createAuthenticatedApi(token);
-      const result = await getTodayStatus(api);
+      const result = await getBedStatus(api, {
+        viewToday,
+        date: viewToday ? undefined : selectedDate,
+      });
 
       if (!isMountedRef.current) {
         return;
       }
 
-      setData(result);
+      setServerDate(result.serverDate);
+      setEditableShift(result.editableShift);
+      setData(result.beds);
       setError(null);
       setLastUpdatedAt(new Date());
+
+      if (viewToday && selectedDate !== result.serverDate) {
+        onServerDateChange?.(result.serverDate);
+      }
     } catch (err) {
       if (!isMountedRef.current) {
         return;
@@ -67,7 +86,7 @@ export function useTodayStatusPolling(
         setIsLoading(false);
       }
     }
-  }, [enabled, token]);
+  }, [enabled, onServerDateChange, selectedDate, serverDate, token]);
 
   const mergeRecord = useCallback((record: DailyRecord) => {
     setData((prev) =>
@@ -89,6 +108,7 @@ export function useTodayStatusPolling(
       setIsLoading(false);
       if (!token) {
         setData([]);
+        setServerDate('');
         setError(null);
         setLastUpdatedAt(null);
       }
@@ -115,9 +135,12 @@ export function useTodayStatusPolling(
 
   return {
     data,
+    serverDate,
+    editableShift,
     isLoading,
     error,
     lastUpdatedAt,
+    isViewingToday,
     refetch: fetchStatus,
     mergeRecord,
   };

@@ -1,10 +1,10 @@
 /** Hospital / app favicon (served from `public/favicon/`). */
-export const APP_FAVICON_SRC = '/favicon/favicon.svg';
+export const APP_FAVICON_SRC = '/favicon/favicon.png';
 
 /** Replace with `/images/logo.png` when hospital asset is available. */
-export const APP_LOGO_SRC = '/images/logo.svg';
+export const APP_LOGO_SRC = '/images/logo.png';
 
-export const APP_LOGO_TEXT_SRC = '/images/logo-text.png';
+export const APP_LOGO_TEXT_SRC = '/images/logo.png';
 
 /** Wordmark on the login card (`text.png`). */
 export const APP_LOGIN_TEXT_SRC = '/images/text.png';
@@ -20,8 +20,8 @@ export const APP_DEFAULT_DEPARTMENT = 'Trung tâm kỹ thuật cao';
 /** Brand chrome aligned with logo (red header, blue footer). */
 export const APP_BRAND_THEME = {
   header: {
-    bg: 'bg-red-700',
-    border: 'border-red-800',
+    bg: 'bg-red-800',
+    border: 'border-red-900',
     text: 'text-white',
     subtle: 'text-red-100',
   },
