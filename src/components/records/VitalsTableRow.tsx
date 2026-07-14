@@ -1,10 +1,7 @@
 import { type KeyboardEvent, useState } from 'react';
-
 import { type VitalsShift } from 'src/utils/date-vn';
 import { formatPatientName } from 'src/utils/format-patient-name';
-
 import { getZebraRowClass } from './floor-colors';
-import { EnteredByLine } from './EnteredByLine';
 import { formatBp, formatNote, formatPulse, formatTemp } from './format-vitals';
 import { NotePreviewModal } from './NotePreviewModal';
 import { type BedTodayStatus } from './types';
@@ -26,6 +23,7 @@ type VitalsTableRowProps = {
     bedId: string,
     patientName: string,
     anchorDate: string,
+    patientCode?: string,
   ) => void;
   readOnly?: boolean;
 };
@@ -76,6 +74,10 @@ export function VitalsTableRow({
     shift === 'morning'
       ? record?.morningPatientName
       : record?.eveningPatientName;
+  const patientCode =
+    shift === 'morning'
+      ? record?.morningPatientCode
+      : record?.eveningPatientCode;
   const pulse =
     shift === 'morning' ? record?.morningPulse : record?.eveningPulse;
   const temp = shift === 'morning' ? record?.morningTemp : record?.eveningTemp;
@@ -169,23 +171,31 @@ export function VitalsTableRow({
       <td {...cellProps} className={`${defaultCellClass} text-left`}>
         <PatientNameCell
           patientName={patientName}
-          onPatientClick={(name) => onPatientClick(bed.bedId, name, anchorDate)}
+          onPatientClick={(name) =>
+            onPatientClick(
+              bed.bedId,
+              name,
+              anchorDate,
+              patientCode?.trim() || undefined,
+            )
+          }
         />
       </td>
-      <td {...cellProps} className={`${getVitalCellClass(pulseAlertClass)} text-center`}>
-        <span className={`${dataClass}`}>
-          {formatPulse(pulse)}
-        </span>
+      <td
+        {...cellProps}
+        className={`${getVitalCellClass(pulseAlertClass)} text-center`}>
+        <span className={`${dataClass}`}>{formatPulse(pulse)}</span>
       </td>
-      <td {...cellProps} className={`${getVitalCellClass(tempAlertClass)} text-center`}>
-        <span className={`${dataClass}`}>
-          {formatTemp(temp)}
-        </span>
+      <td
+        {...cellProps}
+        className={`${getVitalCellClass(tempAlertClass)} text-center`}>
+        <span className={`${dataClass}`}>{formatTemp(temp)}</span>
       </td>
-      <td {...cellProps} className={`${getVitalCellClass(bpAlertClass)} text-center`}>
+      <td
+        {...cellProps}
+        className={`${getVitalCellClass(bpAlertClass)} text-center`}>
         <div>
           <span className={`${dataClass}`}>{formatBp(bp)}</span>
-          <EnteredByLine enteredBy={enteredBy} className="mt-0.5" />
         </div>
       </td>
       <td
@@ -193,7 +203,9 @@ export function VitalsTableRow({
         className={`${noteCellClass} text-center ${hasNote ? 'cursor-pointer hover:bg-slate-100/80' : ''}`}>
         <span
           className={`block truncate text-center text-[10px] sm:text-[11px] ${
-            hasNote ? 'text-slate-700 underline decoration-slate-300 underline-offset-2' : 'text-gray-700'
+            hasNote
+              ? 'text-slate-700 underline decoration-slate-300 underline-offset-2'
+              : 'text-gray-700'
           }`}>
           {noteDisplay}
         </span>

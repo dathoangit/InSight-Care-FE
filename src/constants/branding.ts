@@ -9,11 +9,13 @@ export const APP_LOGO_TEXT_SRC = '/images/logo.png';
 /** Wordmark on the login card (`text.png`). */
 export const APP_LOGIN_TEXT_SRC = '/images/text.png';
 
-export const APP_LOGIN_BG_SRC = '/images/login-bg.jpg';
+export const APP_LOGIN_BG_SRC = '/images/bg.jpg';
 
 export const APP_BRAND_SHORT_NAME = 'InSight Care';
 
 export const APP_ORG_NAME = 'Bệnh viện Đa khoa Xanh Pôn';
+
+export const APP_IT_DEPARTMENT_NAME = 'Phòng CNTT';
 
 export const APP_DEFAULT_DEPARTMENT = 'Trung tâm kỹ thuật cao';
 

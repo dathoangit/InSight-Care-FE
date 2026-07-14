@@ -1,4 +1,5 @@
 import 'src/styles/global.css';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import type { AppProps } from 'next/app';
@@ -80,12 +81,20 @@ function AuthGate({ children }: { children: JSX.Element }) {
 
 function App({ Component, pageProps }: AppProps) {
   return (
-    <AuthProvider>
-      <AuthSessionManager />
-      <AuthGate>
-        <Component {...pageProps} />
-      </AuthGate>
-    </AuthProvider>
+    <>
+      <Head>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
+      </Head>
+      <AuthProvider>
+        <AuthSessionManager />
+        <AuthGate>
+          <Component {...pageProps} />
+        </AuthGate>
+      </AuthProvider>
+    </>
   );
 }
 

@@ -8,7 +8,11 @@ export type DailyRecord = {
   date: string;
   bedId: string;
   morningPatientName: string | null;
+  morningPatientCode: string | null;
+  morningPatientAdmissionId?: string | null;
   eveningPatientName: string | null;
+  eveningPatientCode: string | null;
+  eveningPatientAdmissionId?: string | null;
   morningPulse: number | null;
   morningTemp: number | null;
   morningBp: string | null;
@@ -25,11 +29,12 @@ export type DailyRecord = {
 export type BedTodayStatus = {
   bedId: string;
   roomId: string;
-  floor: number;
+  floor: string;
   roomName: string;
   bedName: string;
   todayRecord: DailyRecord | null;
   yesterdayPatientName: string | null;
+  yesterdayPatientCode: string | null;
 };
 
 export type VitalsShift = 'morning' | 'evening';
@@ -44,7 +49,9 @@ export type BedStatusResponse = {
 export type UpsertDailyRecordBody = {
   bedId: string;
   morningPatientName?: string | null;
+  morningPatientCode?: string | null;
   eveningPatientName?: string | null;
+  eveningPatientCode?: string | null;
   morningPulse?: number | null;
   morningTemp?: number | null;
   morningBp?: string | null;
@@ -90,11 +97,12 @@ export type PatientEpisodeSummary = {
 
 export type PatientEpisodeResponse = {
   patientName: string;
+  patientCode: string | null;
   bed: {
     bedId: string;
     bedName: string;
     roomName: string;
-    floor: number;
+    floor: string;
   };
   startDate: string;
   endDate: string;
@@ -114,5 +122,22 @@ export type PatientEpisodeResponse = {
 export type PatientEpisodeQuery = {
   bedId: string;
   patientName: string;
+  patientCode?: string;
   anchorDate: string;
+};
+
+export type PatientAdmissionItem = {
+  bed: { bedId: string; bedName: string; roomName: string; floor: string };
+  startDate: string;
+  endDate: string;
+  totalDays: number;
+  shiftsWithVitals: number;
+  summary: PatientEpisodeSummary;
+};
+
+export type PatientAdmissionsResponse = {
+  patientCode: string;
+  patientName: string | null;
+  totalAdmissions: number;
+  admissions: PatientAdmissionItem[];
 };

@@ -1,6 +1,7 @@
 import * as XLSX from 'xlsx-js-style';
 
 import { formatYmdDisplay, type VitalsShift } from 'src/utils/date-vn';
+import { compareFloorLabels, sortFloorLabels } from 'src/utils/floor-labels';
 import { formatPatientName } from 'src/utils/format-patient-name';
 
 import { type BedTodayStatus } from './types';
@@ -34,7 +35,7 @@ type FloorSectionMeta = {
 };
 
 function compareBeds(a: BedTodayStatus, b: BedTodayStatus): number {
-  const floorDiff = a.floor - b.floor;
+  const floorDiff = compareFloorLabels(a.floor, b.floor);
   if (floorDiff !== 0) {
     return floorDiff;
   }
@@ -201,7 +202,7 @@ function applyShiftTitleStyles(
 }
 
 function buildFloorSectionRows(
-  floor: number,
+  floor: string,
   beds: BedTodayStatus[],
   startRow: number,
 ): {
@@ -215,7 +216,7 @@ function buildFloorSectionRows(
   let currentRow = startRow;
 
   const floorTitleRow = emptyRow();
-  floorTitleRow[0] = `Tầng ${floor}`;
+  floorTitleRow[0] = `P ${floor}`;
   rows.push(floorTitleRow);
   addMerge(merges, currentRow, MORNING_START_COL, TOTAL_COLS - 1);
   currentRow += 1;
@@ -317,16 +318,14 @@ export function exportVitalsToXlsx(
   const floorMetas: FloorSectionMeta[] = [];
 
   const titleRow = emptyRow();
-  titleRow[0] = `Bảng theo dõi dấu hiệu sinh tồn — ngày ${dateDisplay}`;
+  titleRow[0] = `Bảng theo dõi người bệnh nội trú — ngày ${dateDisplay}`;
   rows.push(titleRow);
   addMerge(merges, 0, MORNING_START_COL, TOTAL_COLS - 1);
 
   rows.push(emptyRow());
 
   let currentRow = 2;
-  const floors = Array.from(new Set(beds.map((bed) => bed.floor))).sort(
-    (a, b) => a - b,
-  );
+  const floors = sortFloorLabels(beds.map((bed) => bed.floor));
 
   for (let index = 0; index < floors.length; index += 1) {
     if (index > 0) {

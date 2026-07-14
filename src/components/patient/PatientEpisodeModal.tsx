@@ -11,12 +11,14 @@ import { ApiError } from 'src/utils/api';
 
 import { EpisodeDailyTable } from './EpisodeDailyTable';
 import { EpisodeHeader } from './EpisodeHeader';
+import { EpisodeOtherAdmissionsSection } from './EpisodeOtherAdmissionsSection';
 import { EpisodeSummaryCards } from './EpisodeSummaryCards';
 import { EpisodeVitalsCharts } from './EpisodeVitalsCharts';
 
 export type PatientEpisodeTarget = {
   bedId: string;
   patientName: string;
+  patientCode?: string;
   anchorDate: string;
 };
 
@@ -24,12 +26,16 @@ type PatientEpisodeModalProps = {
   token: string | null;
   target: PatientEpisodeTarget | null;
   onClose: () => void;
+  onSwitchAdmission?: (target: PatientEpisodeTarget) => void;
 };
 
 type PatientEpisodeModalContentProps = AnimatedModalRenderProps & {
   episode: PatientEpisodeResponse | null;
+  target: PatientEpisodeTarget;
+  token: string | null;
   pending: boolean;
   error: string | null;
+  onSwitchAdmission?: (target: PatientEpisodeTarget) => void;
 };
 
 function ChartSkeleton() {
@@ -46,8 +52,11 @@ function ChartSkeleton() {
 
 function PatientEpisodeModalContent({
   episode,
+  target,
+  token,
   pending,
   error,
+  onSwitchAdmission,
   requestClose,
   isClosing,
   hasEntered,
@@ -82,6 +91,8 @@ function PatientEpisodeModalContent({
 
   const showHeavyContent = hasEntered;
   const showCharts = chartsReady;
+  const effectivePatientCode =
+    episode?.patientCode ?? target.patientCode ?? null;
 
   return (
     <div
@@ -118,7 +129,11 @@ function PatientEpisodeModalContent({
 
         {episode ? (
           <div className="space-y-4 sm:space-y-5">
-            <EpisodeHeader episode={episode} onClose={requestClose} />
+            <EpisodeHeader
+              episode={episode}
+              anchorDate={target.anchorDate}
+              onClose={requestClose}
+            />
             {showHeavyContent ? (
               <div className="space-y-4 sm:space-y-5">
                 <EpisodeSummaryCards summary={episode.summary} />
@@ -133,6 +148,17 @@ function PatientEpisodeModalContent({
                   <ChartSkeleton />
                 )}
                 <EpisodeDailyTable rows={episode.dailyRows} />
+                {effectivePatientCode && onSwitchAdmission ? (
+                  <EpisodeOtherAdmissionsSection
+                    token={token}
+                    patientCode={effectivePatientCode}
+                    patientName={episode.patientName}
+                    currentBedId={episode.bed.bedId}
+                    currentStartDate={episode.startDate}
+                    currentEndDate={episode.endDate}
+                    onSwitchAdmission={onSwitchAdmission}
+                  />
+                ) : null}
               </div>
             ) : (
               <ChartSkeleton />
@@ -148,6 +174,7 @@ export function PatientEpisodeModal({
   token,
   target,
   onClose,
+  onSwitchAdmission,
 }: PatientEpisodeModalProps) {
   const [episode, setEpisode] = useState<PatientEpisodeResponse | null>(null);
   const [pending, setPending] = useState(false);
@@ -218,8 +245,11 @@ export function PatientEpisodeModal({
           <PatientEpisodeModalContent
             {...modalProps}
             episode={episode}
+            target={target}
+            token={token}
             pending={pending}
             error={error}
+            onSwitchAdmission={onSwitchAdmission}
           />
         );
       }}

@@ -10,7 +10,7 @@ export type LayoutRoom = {
 };
 
 export type LayoutFloor = {
-  floor: number;
+  floor: string;
   rooms: LayoutRoom[];
 };
 
@@ -20,5 +20,5 @@ export type FlatLayoutBed = {
   bedName: string;
   roomId: string;
   roomName: string;
-  floor: number;
+  floor: string;
 };

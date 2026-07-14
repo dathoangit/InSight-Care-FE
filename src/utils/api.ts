@@ -1,3 +1,4 @@
+import { getPublicApiBaseUrl, joinApiUrl } from 'src/config/public-api';
 import { notifyUnauthorized } from 'src/auth/unauthorized';
 
 type PrimitiveValue = string | number | boolean;
@@ -42,18 +43,15 @@ const buildUrl = ({
   endPoint,
   params,
 }: ApiRequestBase & { params?: QueryParams }): string => {
-  const url = new URL(endPoint, api || 'http://localhost');
+  const resolvedApi = api || getPublicApiBaseUrl();
+  const url = new URL(joinApiUrl(resolvedApi, endPoint));
+
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         url.searchParams.set(key, String(value));
       }
     });
-  }
-
-  // Keep original behavior when api is not provided: return relative endpoint URL.
-  if (!api) {
-    return `${url.pathname}${url.search}`;
   }
 
   return url.toString();
@@ -112,15 +110,32 @@ const handleUnauthorized = (status: number, token?: string): void => {
   }
 };
 
+const buildRequestHeaders = (
+  api: string,
+  headers: Record<string, string> = {},
+): Record<string, string> => {
+  const nextHeaders = { ...headers };
+
+  if (api.includes('ngrok')) {
+    nextHeaders['ngrok-skip-browser-warning'] = 'true';
+  }
+
+  return nextHeaders;
+};
+
 export const apiGet = async <TResponse = unknown>({
-  api = process.env.NEXT_PUBLIC_API_URL || '',
+  api,
   endPoint,
   params,
   token,
 }: ApiGetOptions): Promise<TResponse> => {
-  const response = await fetch(buildUrl({ api, endPoint, params }), {
+  const resolvedApi = api ?? getPublicApiBaseUrl();
+  const response = await fetch(buildUrl({ api: resolvedApi, endPoint, params }), {
     method: 'GET',
-    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    headers: buildRequestHeaders(
+      resolvedApi,
+      token ? { Authorization: `Bearer ${token}` } : {},
+    ),
   });
 
   const payload = await parseJsonSafely(response);
@@ -138,17 +153,18 @@ export const apiGet = async <TResponse = unknown>({
 };
 
 export const apiPost = async <TResponse = unknown, TBody = unknown>({
-  api = process.env.NEXT_PUBLIC_API_URL || '',
+  api,
   endPoint,
   body,
   token,
 }: ApiPostOptions<TBody>): Promise<TResponse> => {
-  const response = await fetch(buildUrl({ api, endPoint }), {
+  const resolvedApi = api ?? getPublicApiBaseUrl();
+  const response = await fetch(buildUrl({ api: resolvedApi, endPoint }), {
     method: 'POST',
-    headers: {
+    headers: buildRequestHeaders(resolvedApi, {
       'Content-Type': 'application/json; charset=utf-8',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
+    }),
     body: body === undefined ? undefined : JSON.stringify(body),
   });
 

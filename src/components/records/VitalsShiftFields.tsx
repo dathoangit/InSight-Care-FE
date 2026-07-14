@@ -100,7 +100,7 @@ export function VitalsShiftFields({
           autoComplete="off"
           value={bp}
           disabled={bpDisabled}
-          placeholder={pulseIsZero ? '0/0' : 'VD: 12080 → 120/80'}
+          placeholder={pulseIsZero ? '0/0' : 'VD: 12080, 9060 — tối đa 300/200'}
           onChange={(event) =>
             onBpChange(formatBloodPressureInput(event.target.value, pulse))
           }

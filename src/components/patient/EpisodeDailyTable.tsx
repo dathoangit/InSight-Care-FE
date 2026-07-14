@@ -1,6 +1,4 @@
 import { formatYmdDisplay, type VitalsShift } from 'src/utils/date-vn';
-
-import { EnteredByLine } from 'src/components/records/EnteredByLine';
 import {
   formatBp,
   formatNote,
@@ -111,7 +109,6 @@ function ShiftVitalsPanel({ shift, point }: ShiftVitalsPanelProps) {
           multiline
         />
       </dl>
-      <EnteredByLine enteredBy={point?.enteredBy} className="mt-2" />
     </div>
   );
 }

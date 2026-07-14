@@ -10,6 +10,7 @@ import { exportVitalsToXlsx } from './export-vitals-xlsx';
 import { FloorTabs } from './FloorTabs';
 import { type BedTodayStatus } from './types';
 import { VitalsSpreadsheetTable } from './VitalsSpreadsheetTable';
+import { sortFloorLabels } from 'src/utils/floor-labels';
 
 type TodayStatusSectionProps = {
   data: BedTodayStatus[];
@@ -26,6 +27,7 @@ type TodayStatusSectionProps = {
     bedId: string,
     patientName: string,
     anchorDate: string,
+    patientCode?: string,
   ) => void;
 };
 
@@ -46,12 +48,11 @@ export function TodayStatusSection({
   const shiftLabel =
     editableShift === 'morning' ? 'Sáng (0h–11h59)' : 'Chiều (12h–23h59)';
   const floors = useMemo(
-    () =>
-      Array.from(new Set(data.map((bed) => bed.floor))).sort((a, b) => a - b),
+    () => sortFloorLabels(data.map((bed) => bed.floor)),
     [data],
   );
 
-  const [activeFloor, setActiveFloor] = useState<number | null>(null);
+  const [activeFloor, setActiveFloor] = useState<string | null>(null);
 
   useEffect(() => {
     if (floors.length === 0) {
@@ -73,23 +74,25 @@ export function TodayStatusSection({
   );
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-2 shadow-sm sm:p-4">
+    <section className="min-w-0 overflow-x-clip rounded-xl border border-slate-200 bg-white p-2 shadow-sm sm:p-4">
       <div className="mb-4 flex items-end justify-between gap-2">
         <div className="flex items-end gap-2 sm:gap-3">
           <div>
-            <input
-              id="vitals-date"
-              type="date"
-              value={selectedDate}
-              max={serverDate || undefined}
-              disabled={!serverDate}
-              onChange={(event) => {
-                if (event.target.value) {
-                  onSelectedDateChange(event.target.value);
-                }
-              }}
-              className="mt-1 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 disabled:cursor-not-allowed disabled:bg-slate-100"
-            />
+            <div className="date-input-shell">
+              <input
+                id="vitals-date"
+                type="date"
+                value={selectedDate}
+                max={serverDate || undefined}
+                disabled={!serverDate}
+                onChange={(event) => {
+                  if (event.target.value) {
+                    onSelectedDateChange(event.target.value);
+                  }
+                }}
+                className="date-input-fit mt-1 box-border w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 disabled:cursor-not-allowed disabled:bg-slate-100"
+              />
+            </div>
           </div>
           {serverDate && selectedDate !== serverDate ? (
             <button
@@ -111,7 +114,7 @@ export function TodayStatusSection({
 
       <div className="text-center">
         <h2 className="text-lg font-bold uppercase tracking-wide text-slate-900 sm:text-lg">
-          Bảng theo dõi dấu hiệu sinh tồn
+          Bảng theo dõi người bênh nội trú
         </h2>
       </div>
 

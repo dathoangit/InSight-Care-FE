@@ -1,7 +1,7 @@
 type FloorTabsProps = {
-  floors: number[];
-  activeFloor: number;
-  onChange: (floor: number) => void;
+  floors: string[];
+  activeFloor: string;
+  onChange: (floor: string) => void;
 };
 
 export function FloorTabs({
@@ -26,7 +26,7 @@ export function FloorTabs({
                 ? 'z-10 bg-red-800 font-bold text-white'
                 : 'border border-b-0 border-gray-300 bg-gray-200 font-medium text-gray-600 hover:bg-gray-100',
             ].join(' ')}>
-            Tầng {floor}
+            P {floor}
           </button>
         );
       })}

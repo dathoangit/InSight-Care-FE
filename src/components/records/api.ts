@@ -4,6 +4,7 @@ import {
   type BedStatusResponse,
   type BedTodayStatus,
   type DailyRecord,
+  type PatientAdmissionsResponse,
   type PatientEpisodeQuery,
   type PatientEpisodeResponse,
   type UpsertDailyRecordBody,
@@ -48,6 +49,16 @@ export function getPatientEpisode(
   return api.get<PatientEpisodeResponse>('/records/patient-episode', {
     bedId: query.bedId,
     patientName: query.patientName,
+    patientCode: query.patientCode,
     anchorDate: query.anchorDate,
+  });
+}
+
+export function getPatientAdmissions(
+  api: AuthenticatedApi,
+  patientCode: string,
+): Promise<PatientAdmissionsResponse> {
+  return api.get<PatientAdmissionsResponse>('/records/patient-admissions', {
+    patientCode,
   });
 }

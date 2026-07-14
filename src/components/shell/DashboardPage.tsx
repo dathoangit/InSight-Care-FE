@@ -81,8 +81,9 @@ export function DashboardPage() {
     bedId: string,
     patientName: string,
     anchorDate: string,
+    patientCode?: string,
   ) => {
-    setPatientEpisodeTarget({ bedId, patientName, anchorDate });
+    setPatientEpisodeTarget({ bedId, patientName, anchorDate, patientCode });
   };
 
   const handleRecordSaved = (record: DailyRecord) => {
@@ -97,8 +98,8 @@ export function DashboardPage() {
   const displayDate = selectedDate || serverDate;
 
   return (
-    <main className="mx-auto w-full max-w-[1400px] px-1 py-4 sm:px-4 sm:py-8">
-      <div className="space-y-6">
+    <main className="mx-auto w-full min-w-0 max-w-[1400px] overflow-x-clip px-1 py-4 sm:px-4 sm:py-8">
+      <div className="min-w-0 space-y-6">
         <TodayStatusSection
           data={data}
           isLoading={isLoading}
@@ -128,6 +129,7 @@ export function DashboardPage() {
           token={accessToken}
           target={patientEpisodeTarget}
           onClose={() => setPatientEpisodeTarget(null)}
+          onSwitchAdmission={setPatientEpisodeTarget}
         />
 
         <HistorySection

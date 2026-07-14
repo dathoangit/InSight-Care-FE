@@ -36,6 +36,44 @@ export function formatTemperatureInput(raw: string): string {
   return `${digits.slice(0, 2)}.${digits.slice(2)}`;
 }
 
+function getBloodPressureSystolicDigitLength(digits: string): number {
+  const firstDigit = Number.parseInt(digits[0] ?? '', 10);
+
+  if (firstDigit <= 2) {
+    return 3;
+  }
+
+  if (digits.startsWith('300')) {
+    return 3;
+  }
+
+  return 2;
+}
+
+function capSystolicDigits(digits: string): string {
+  const value = Number.parseInt(digits, 10);
+
+  if (Number.isFinite(value) && value > VITALS_RANGES.bpSystolic.max) {
+    return String(VITALS_RANGES.bpSystolic.max);
+  }
+
+  return digits;
+}
+
+function capDiastolicDigits(digits: string): string {
+  if (digits.length < 3) {
+    return digits;
+  }
+
+  const value = Number.parseInt(digits, 10);
+
+  if (Number.isFinite(value) && value > VITALS_RANGES.bpDiastolic.max) {
+    return String(VITALS_RANGES.bpDiastolic.max);
+  }
+
+  return digits;
+}
+
 export function formatBloodPressureInput(
   raw: string,
   pulseValue: string,
@@ -50,11 +88,23 @@ export function formatBloodPressureInput(
     return '';
   }
 
-  if (digits.length <= 3) {
-    return digits;
+  const firstDigit = Number.parseInt(digits[0] ?? '', 10);
+  if (!Number.isFinite(firstDigit)) {
+    return '';
   }
 
-  return `${digits.slice(0, 3)}/${digits.slice(3)}`;
+  const systolicLength = getBloodPressureSystolicDigitLength(digits);
+
+  if (digits.length <= systolicLength) {
+    return capSystolicDigits(digits);
+  }
+
+  const systolicPart = capSystolicDigits(digits.slice(0, systolicLength));
+  const diastolicPart = capDiastolicDigits(
+    digits.slice(systolicLength, systolicLength + 3),
+  );
+
+  return `${systolicPart}/${diastolicPart}`;
 }
 
 export function parsePulseValue(display: string): number | null {

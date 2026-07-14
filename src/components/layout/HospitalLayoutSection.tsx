@@ -103,7 +103,7 @@ export function HospitalLayoutSection({ token }: HospitalLayoutSectionProps) {
                     key={floor.floor}
                     className="rounded-lg border border-slate-200 bg-slate-50 p-4">
                     <h3 className="text-sm font-semibold text-slate-800">
-                      Tầng {floor.floor}
+                      P {floor.floor}
                     </h3>
                     <div className="mt-3 space-y-3">
                       {floor.rooms.map((room) => (
