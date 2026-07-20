@@ -11,6 +11,7 @@ import { useRouter } from 'next/router';
 
 import { getUserAccountDetails } from 'src/auth/display-user';
 import { useAuth } from 'src/auth/context';
+import { ADMIN_USERS_PATH, isAdmin } from 'src/auth/role-routing';
 import { APP_DEFAULT_DEPARTMENT } from 'src/constants/branding';
 
 type UserAccountMenuProps = {
@@ -35,7 +36,7 @@ function ChevronDownIcon({ className }: { className?: string }) {
 
 export function UserAccountMenu({ className = '' }: UserAccountMenuProps) {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, role, logout } = useAuth();
   const menuId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -138,6 +139,11 @@ export function UserAccountMenu({ className = '' }: UserAccountMenuProps) {
     );
   };
 
+  const handleManageAccounts = () => {
+    close();
+    void router.push(ADMIN_USERS_PATH);
+  };
+
   const panel =
     open && panelStyle && typeof document !== 'undefined'
       ? createPortal(
@@ -152,9 +158,13 @@ export function UserAccountMenu({ className = '' }: UserAccountMenuProps) {
               width: panelStyle.width,
             }}>
             <p className="text-base font-semibold text-slate-900">
-              {details.username}
+              {details.fullName}
             </p>
             <dl className="mt-2 space-y-1 text-sm text-slate-500">
+              <div>
+                <dt className="sr-only">Tên đăng nhập</dt>
+                <dd>Tên đăng nhập: {details.username}</dd>
+              </div>
               <div>
                 <dt className="sr-only">Vai trò</dt>
                 <dd>Vai trò: {details.roleLabel}</dd>
@@ -170,6 +180,15 @@ export function UserAccountMenu({ className = '' }: UserAccountMenuProps) {
             </dl>
 
             <div className="mt-4 space-y-2 border-t border-slate-200 pt-4">
+              {isAdmin(role) ? (
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={handleManageAccounts}
+                  className="w-full rounded-lg border border-sky-200 bg-sky-50 px-4 py-2.5 text-sm font-semibold text-sky-800 transition hover:bg-sky-100">
+                  Quản lý tài khoản
+                </button>
+              ) : null}
               <button
                 type="button"
                 role="menuitem"
@@ -205,7 +224,7 @@ export function UserAccountMenu({ className = '' }: UserAccountMenuProps) {
           setOpen(true);
         }}
         className="inline-flex max-w-[min(100vw-12rem,14rem)] items-center gap-1.5 rounded-lg border border-white/35 bg-white/10 px-3 py-2 text-sm font-medium text-white transition hover:bg-white/20 sm:max-w-none sm:gap-2 sm:px-3.5">
-        <span className="truncate">{details.username}</span>
+        <span className="truncate">{details.fullName}</span>
         <ChevronDownIcon
           className={`h-4 w-4 shrink-0 transition ${open ? 'rotate-180' : ''}`}
         />

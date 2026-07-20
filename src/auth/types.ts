@@ -21,6 +21,7 @@ export type AuthMeResponse = {
   createdAt: string;
   updatedAt: string;
   username: string;
+  fullName: string;
   email?: string | null;
   role: AuthRole;
   isActive: boolean;

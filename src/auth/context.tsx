@@ -46,7 +46,13 @@ function parseStoredUser(raw: string): AuthMeResponse | null {
       isAuthRole(parsed.role) &&
       typeof parsed.isActive === 'boolean'
     ) {
-      return parsed as AuthMeResponse;
+      return {
+        ...(parsed as AuthMeResponse),
+        fullName:
+          typeof parsed.fullName === 'string' && parsed.fullName.trim()
+            ? parsed.fullName
+            : parsed.username,
+      };
     }
   } catch {
     /* ignore */

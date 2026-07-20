@@ -181,3 +181,67 @@ export const apiPost = async <TResponse = unknown, TBody = unknown>({
 
   return unwrapApiResponseData<TResponse>(payload);
 };
+
+type ApiPatchOptions<TBody = unknown> = ApiRequestBase & {
+  body?: TBody;
+};
+
+export const apiPatch = async <TResponse = unknown, TBody = unknown>({
+  api,
+  endPoint,
+  body,
+  token,
+}: ApiPatchOptions<TBody>): Promise<TResponse> => {
+  const resolvedApi = api ?? getPublicApiBaseUrl();
+  const response = await fetch(buildUrl({ api: resolvedApi, endPoint }), {
+    method: 'PATCH',
+    headers: buildRequestHeaders(resolvedApi, {
+      'Content-Type': 'application/json; charset=utf-8',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    }),
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+
+  const payload = await parseJsonSafely(response);
+
+  if (!response.ok) {
+    handleUnauthorized(response.status, token);
+    throw new ApiError(getErrorMessage(response, payload), response.status, payload);
+  }
+
+  if (response.status === 204) {
+    return null as TResponse;
+  }
+
+  return unwrapApiResponseData<TResponse>(payload);
+};
+
+type ApiDeleteOptions = ApiRequestBase;
+
+export const apiDelete = async <TResponse = unknown>({
+  api,
+  endPoint,
+  token,
+}: ApiDeleteOptions): Promise<TResponse> => {
+  const resolvedApi = api ?? getPublicApiBaseUrl();
+  const response = await fetch(buildUrl({ api: resolvedApi, endPoint }), {
+    method: 'DELETE',
+    headers: buildRequestHeaders(
+      resolvedApi,
+      token ? { Authorization: `Bearer ${token}` } : {},
+    ),
+  });
+
+  const payload = await parseJsonSafely(response);
+
+  if (!response.ok) {
+    handleUnauthorized(response.status, token);
+    throw new ApiError(getErrorMessage(response, payload), response.status, payload);
+  }
+
+  if (response.status === 204) {
+    return null as TResponse;
+  }
+
+  return unwrapApiResponseData<TResponse>(payload);
+};

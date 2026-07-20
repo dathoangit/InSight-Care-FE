@@ -23,6 +23,7 @@ export function deriveStaffCode(username: string): string {
 }
 
 export type UserAccountDetails = {
+  fullName: string;
   username: string;
   roleLabel: string;
   department: string;
@@ -34,6 +35,7 @@ export function getUserAccountDetails(
   department = 'Khoa Nội',
 ): UserAccountDetails {
   return {
+    fullName: user.fullName?.trim() || user.username,
     username: user.username,
     roleLabel: formatAuthRoleLabel(user.role),
     department,

@@ -5,10 +5,16 @@ import { useEffect } from 'react';
 import type { AppProps } from 'next/app';
 import { AuthSessionManager } from 'src/auth/AuthSessionManager';
 import { AuthProvider, useAuth } from 'src/auth/context';
-import { getDefaultLandingPath } from 'src/auth/role-routing';
+import {
+  ADMIN_USERS_PATH,
+  getDefaultLandingPath,
+  HOME_PATH,
+  isAdmin,
+} from 'src/auth/role-routing';
 import { AppShell } from 'src/components/shell/AppShell';
 
-const PROTECTED_PATHS = ['/'];
+const PROTECTED_PATHS = [HOME_PATH, ADMIN_USERS_PATH];
+const ADMIN_ONLY_PATHS = [ADMIN_USERS_PATH];
 const PUBLIC_PATHS = ['/login', '/404'];
 
 function isPathPublic(pathname: string): boolean {
@@ -19,12 +25,17 @@ function isPathProtected(pathname: string): boolean {
   return PROTECTED_PATHS.includes(pathname);
 }
 
+function isPathAdminOnly(pathname: string): boolean {
+  return ADMIN_ONLY_PATHS.includes(pathname);
+}
+
 function AuthGate({ children }: { children: JSX.Element }) {
   const router = useRouter();
-  const { isAuthenticated, isBootstrapping, user } = useAuth();
+  const { isAuthenticated, isBootstrapping, user, role } = useAuth();
   const path = router.pathname;
   const isPublic = isPathPublic(path);
   const isProtected = isPathProtected(path);
+  const isAdminOnly = isPathAdminOnly(path);
 
   useEffect(() => {
     if (isBootstrapping) {
@@ -33,6 +44,11 @@ function AuthGate({ children }: { children: JSX.Element }) {
 
     if (!isAuthenticated && isProtected) {
       void router.replace('/login');
+      return;
+    }
+
+    if (isAuthenticated && isAdminOnly && !isAdmin(role)) {
+      void router.replace(HOME_PATH);
       return;
     }
 
@@ -47,7 +63,9 @@ function AuthGate({ children }: { children: JSX.Element }) {
     isBootstrapping,
     isProtected,
     isPublic,
+    isAdminOnly,
     path,
+    role,
     router,
     user,
   ]);
@@ -64,6 +82,14 @@ function AuthGate({ children }: { children: JSX.Element }) {
     return (
       <main className="flex min-h-screen items-center justify-center px-6">
         <p className="text-sm text-slate-600">Redirecting to login...</p>
+      </main>
+    );
+  }
+
+  if (isAuthenticated && isAdminOnly && !isAdmin(role)) {
+    return (
+      <main className="flex min-h-screen items-center justify-center px-6">
+        <p className="text-sm text-slate-600">Redirecting to home...</p>
       </main>
     );
   }
