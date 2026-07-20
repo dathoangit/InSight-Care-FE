@@ -19,6 +19,7 @@ export type PatientEpisodeTarget = {
   bedId: string;
   patientName: string;
   patientCode?: string;
+  medicalRecordCode?: string;
   anchorDate: string;
 };
 

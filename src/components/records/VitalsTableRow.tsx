@@ -24,6 +24,7 @@ type VitalsTableRowProps = {
     patientName: string,
     anchorDate: string,
     patientCode?: string,
+    medicalRecordCode?: string,
   ) => void;
   readOnly?: boolean;
 };
@@ -78,6 +79,10 @@ export function VitalsTableRow({
     shift === 'morning'
       ? record?.morningPatientCode
       : record?.eveningPatientCode;
+  const medicalRecordCode =
+    shift === 'morning'
+      ? record?.morningMedicalRecordCode
+      : record?.eveningMedicalRecordCode;
   const pulse =
     shift === 'morning' ? record?.morningPulse : record?.eveningPulse;
   const temp = shift === 'morning' ? record?.morningTemp : record?.eveningTemp;
@@ -177,6 +182,7 @@ export function VitalsTableRow({
               name,
               anchorDate,
               patientCode?.trim() || undefined,
+              medicalRecordCode?.trim() || undefined,
             )
           }
         />

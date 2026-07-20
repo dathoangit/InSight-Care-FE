@@ -6,15 +6,13 @@ import { getDefaultLandingPath } from 'src/auth/role-routing';
 import { ApiError } from 'src/utils/api';
 
 const INVALID_CREDENTIALS_MESSAGE = 'Sai tên đăng nhập hoặc mật khẩu.';
-const DEV_LOGIN_USERNAME = 'admin';
-const DEV_LOGIN_PASSWORD = '0123456789';
 const isDev = process.env.NODE_ENV === 'development';
 
 export function useLoginForm() {
   const router = useRouter();
   const { login } = useAuth();
-  const [username, setUsername] = useState(isDev ? DEV_LOGIN_USERNAME : '');
-  const [password, setPassword] = useState(isDev ? DEV_LOGIN_PASSWORD : '');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

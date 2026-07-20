@@ -3,7 +3,7 @@ function collectAllowedDevOrigins() {
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-  if (apiUrl && apiUrl !== 'proxy') {
+  if (apiUrl) {
     try {
       const hostname = new URL(apiUrl).hostname;
 
@@ -28,21 +28,10 @@ function collectAllowedDevOrigins() {
   return [...origins];
 }
 
-const backendInternalUrl =
-  process.env.BACKEND_INTERNAL_URL?.trim() || 'http://localhost:8081';
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   allowedDevOrigins: collectAllowedDevOrigins(),
-  async rewrites() {
-    return [
-      {
-        source: '/backend/:path*',
-        destination: `${backendInternalUrl.replace(/\/$/, '')}/:path*`,
-      },
-    ];
-  },
 };
 
 module.exports = nextConfig;

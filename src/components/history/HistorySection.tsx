@@ -27,6 +27,7 @@ type HistorySectionProps = {
     patientName: string,
     anchorDate: string,
     patientCode?: string,
+    medicalRecordCode?: string,
   ) => void;
 };
 
@@ -51,6 +52,7 @@ function formatLatestVitals(summary: HistoryAdmissionItem['summary']): string {
 function HistoryShiftCell({
   patientName,
   patientCode,
+  medicalRecordCode,
   pulse,
   temp,
   bp,
@@ -62,6 +64,7 @@ function HistoryShiftCell({
 }: {
   patientName: string | null;
   patientCode: string | null;
+  medicalRecordCode: string | null;
   pulse: number | null;
   temp: number | null;
   bp: string | null;
@@ -74,6 +77,7 @@ function HistoryShiftCell({
     patientName: string,
     anchorDate: string,
     patientCode?: string,
+    medicalRecordCode?: string,
   ) => void;
 }) {
   const name = patientName?.trim();
@@ -95,7 +99,13 @@ function HistoryShiftCell({
           <button
             type="button"
             onClick={() =>
-              onPatientClick(bedId, name, anchorDate, patientCode ?? undefined)
+              onPatientClick(
+                bedId,
+                name,
+                anchorDate,
+                patientCode ?? undefined,
+                medicalRecordCode ?? undefined,
+              )
             }
             className="text-left text-sm font-medium text-blue-600 hover:text-blue-800">
             {formatPatientName(name)}
@@ -107,6 +117,11 @@ function HistoryShiftCell({
       {patientCode?.trim() ? (
         <p className="text-xs tabular-nums text-slate-500">
           Mã NB: {patientCode.trim()}
+        </p>
+      ) : null}
+      {medicalRecordCode?.trim() ? (
+        <p className="text-xs tabular-nums text-slate-500">
+          Mã BA: {medicalRecordCode.trim()}
         </p>
       ) : null}
       <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-slate-700">
@@ -170,6 +185,11 @@ function HistoryAdmissionCard({
               Mã NB: {admission.patientCode.trim()}
             </p>
           ) : null}
+          {admission.medicalRecordCode?.trim() ? (
+            <p className="mt-1 text-xs tabular-nums text-slate-500">
+              Mã BA: {admission.medicalRecordCode.trim()}
+            </p>
+          ) : null}
         </div>
         <span className="shrink-0 rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-slate-700 ring-1 ring-slate-200">
           {formatYmdDisplay(admission.startDate)} –{' '}
@@ -199,6 +219,7 @@ function HistoryAdmissionCard({
             name,
             admission.startDate,
             admission.patientCode ?? undefined,
+            admission.medicalRecordCode ?? undefined,
           )
         }
         className={`${cardClassName} hover:border-sky-200 hover:bg-sky-50 active:bg-sky-100`}>
@@ -248,6 +269,7 @@ function HistoryAdmissionResults({
                 Bệnh nhân
               </th>
               <th className="px-2 py-2 font-medium">Mã NB</th>
+              <th className="px-2 py-2 font-medium">Mã BA</th>
               <th className="px-2 py-2 font-medium">Nhập viện</th>
               <th className="px-2 py-2 font-medium">Ra viện</th>
               <th className="px-2 py-2 font-medium">Giường</th>
@@ -274,6 +296,7 @@ function HistoryAdmissionResults({
                               name,
                               admission.startDate,
                               admission.patientCode ?? undefined,
+                              admission.medicalRecordCode ?? undefined,
                             )
                           }
                           className="text-left font-medium text-blue-600 hover:text-blue-800">
@@ -288,6 +311,9 @@ function HistoryAdmissionResults({
                   </td>
                   <td className="px-2 py-2 tabular-nums">
                     {admission.patientCode?.trim() || '—'}
+                  </td>
+                  <td className="px-2 py-2 tabular-nums">
+                    {admission.medicalRecordCode?.trim() || '—'}
                   </td>
                   <td className="px-2 py-2">
                     {formatYmdDisplay(admission.startDate)}
@@ -344,6 +370,7 @@ export function HistorySection({
   }, [serverDate]);
   const [patientName, setPatientName] = useState('');
   const [patientCode, setPatientCode] = useState('');
+  const [medicalRecordCode, setMedicalRecordCode] = useState('');
   const [bedId, setBedId] = useState('');
   const [records, setRecords] = useState<DailyRecord[]>([]);
   const [admissions, setAdmissions] = useState<HistoryAdmissionItem[]>([]);
@@ -369,6 +396,7 @@ export function HistorySection({
         endDate,
         patientName: patientName.trim() || undefined,
         patientCode: patientCode.trim() || undefined,
+        medicalRecordCode: medicalRecordCode.trim() || undefined,
         bedId: bedId || undefined,
       });
       setRecords(result.items);
@@ -495,6 +523,26 @@ export function HistorySection({
 
             <div className="min-w-0">
               <label
+                htmlFor="historyMedicalRecordCode"
+                className="block text-xs font-medium text-slate-700 sm:text-sm">
+                Mã BA
+              </label>
+              <input
+                id="historyMedicalRecordCode"
+                type="text"
+                inputMode="numeric"
+                value={medicalRecordCode}
+                onChange={(e) =>
+                  setMedicalRecordCode(
+                    e.target.value.replace(/\D/g, '').slice(0, 10),
+                  )
+                }
+                className="mt-1 box-border min-w-0 max-w-full w-full rounded-lg border border-slate-300 px-2 py-1.5 text-xs tabular-nums sm:px-3 sm:py-2 sm:text-sm"
+              />
+            </div>
+
+            <div className="min-w-0">
+              <label
                 htmlFor="historyBed"
                 className="block text-xs font-medium text-slate-700 sm:text-sm">
                 Giường
@@ -582,6 +630,9 @@ export function HistorySection({
                               <HistoryShiftCell
                                 patientName={record.morningPatientName}
                                 patientCode={record.morningPatientCode}
+                                medicalRecordCode={
+                                  record.morningMedicalRecordCode
+                                }
                                 pulse={record.morningPulse}
                                 temp={record.morningTemp}
                                 bp={record.morningBp}
@@ -596,6 +647,9 @@ export function HistorySection({
                               <HistoryShiftCell
                                 patientName={record.eveningPatientName}
                                 patientCode={record.eveningPatientCode}
+                                medicalRecordCode={
+                                  record.eveningMedicalRecordCode
+                                }
                                 pulse={record.eveningPulse}
                                 temp={record.eveningTemp}
                                 bp={record.eveningBp}

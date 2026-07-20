@@ -29,6 +29,7 @@ type BedRecordModalProps = {
 type FormState = {
   patientName: string;
   patientCode: string;
+  medicalRecordCode: string;
   morningPulse: string;
   morningTemp: string;
   morningBp: string;
@@ -64,7 +65,19 @@ function getPreviousShiftPatientCode(
   return null;
 }
 
-function formatPatientCodeInput(value: string): string {
+function getPreviousShiftMedicalRecordCode(
+  bed: BedTodayStatus,
+  shift: VitalsShift,
+): string | null {
+  if (shift === 'evening') {
+    const code = bed.todayRecord?.morningMedicalRecordCode?.trim();
+    return code || null;
+  }
+
+  return null;
+}
+
+function formatDigitCodeInput(value: string): string {
   return value.replace(/\D/g, '').slice(0, 10);
 }
 
@@ -111,6 +124,22 @@ function getInheritedPatientCode(
   return bed.yesterdayPatientCode?.trim() || null;
 }
 
+function getInheritedMedicalRecordCode(
+  bed: BedTodayStatus,
+  shift: VitalsShift,
+  patientName: string,
+): string | null {
+  if (!isContinuingPatient(bed, shift, patientName)) {
+    return null;
+  }
+
+  if (shift === 'evening') {
+    return bed.todayRecord?.morningMedicalRecordCode?.trim() || null;
+  }
+
+  return bed.yesterdayMedicalRecordCode?.trim() || null;
+}
+
 function getSavedShiftPatientCode(
   bed: BedTodayStatus,
   shift: VitalsShift,
@@ -123,16 +152,33 @@ function getSavedShiftPatientCode(
   return code?.trim() || null;
 }
 
+function getSavedShiftMedicalRecordCode(
+  bed: BedTodayStatus,
+  shift: VitalsShift,
+): string | null {
+  const code =
+    shift === 'morning'
+      ? bed.todayRecord?.morningMedicalRecordCode
+      : bed.todayRecord?.eveningMedicalRecordCode;
+
+  return code?.trim() || null;
+}
+
 function toFormState(bed: BedTodayStatus, shift: VitalsShift): FormState {
   const record = bed.todayRecord;
   const shiftPatientName =
     shift === 'morning' ? record?.morningPatientName : record?.eveningPatientName;
   const shiftPatientCode =
     shift === 'morning' ? record?.morningPatientCode : record?.eveningPatientCode;
+  const shiftMedicalRecordCode =
+    shift === 'morning'
+      ? record?.morningMedicalRecordCode
+      : record?.eveningMedicalRecordCode;
 
   return {
     patientName: formatPatientName(shiftPatientName ?? ''),
     patientCode: shiftPatientCode ?? '',
+    medicalRecordCode: shiftMedicalRecordCode ?? '',
     morningPulse: record?.morningPulse?.toString() ?? '',
     morningTemp: temperatureToInputDisplay(record?.morningTemp),
     morningBp:
@@ -161,6 +207,7 @@ export function BedRecordModal({
   const [form, setForm] = useState<FormState>({
     patientName: '',
     patientCode: '',
+    medicalRecordCode: '',
     morningPulse: '',
     morningTemp: '',
     morningBp: '',
@@ -205,6 +252,10 @@ export function BedRecordModal({
         const idPrefix = shift === 'morning' ? 'morning' : 'evening';
         const previousShiftPatientName = getPreviousShiftPatientName(bed, shift);
         const previousShiftPatientCode = getPreviousShiftPatientCode(bed, shift);
+        const previousShiftMedicalRecordCode = getPreviousShiftMedicalRecordCode(
+          bed,
+          shift,
+        );
         const previousShiftPatientDisplay = previousShiftPatientName
           ? formatPatientName(previousShiftPatientName)
           : null;
@@ -214,6 +265,10 @@ export function BedRecordModal({
           !namesMatch(form.patientName, previousShiftPatientDisplay);
 
         const savedShiftPatientCode = getSavedShiftPatientCode(bed, shift);
+        const savedShiftMedicalRecordCode = getSavedShiftMedicalRecordCode(
+          bed,
+          shift,
+        );
         const continuingPatient = isContinuingPatient(
           bed,
           shift,
@@ -224,14 +279,28 @@ export function BedRecordModal({
           shift,
           form.patientName,
         );
+        const inheritedMedicalRecordCode = getInheritedMedicalRecordCode(
+          bed,
+          shift,
+          form.patientName,
+        );
         const showPatientCodeInput =
           canEdit &&
           !savedShiftPatientCode &&
           !(continuingPatient && inheritedPatientCode);
+        const showMedicalRecordCodeInput =
+          canEdit &&
+          !savedShiftMedicalRecordCode &&
+          !(continuingPatient && inheritedMedicalRecordCode);
         const resolvedPatientCode =
           form.patientCode.trim() ||
           savedShiftPatientCode ||
           inheritedPatientCode ||
+          null;
+        const resolvedMedicalRecordCode =
+          form.medicalRecordCode.trim() ||
+          savedShiftMedicalRecordCode ||
+          inheritedMedicalRecordCode ||
           null;
 
         const handleFillPreviousPatient = () => {
@@ -243,6 +312,7 @@ export function BedRecordModal({
             ...prev,
             patientName: previousShiftPatientDisplay,
             patientCode: previousShiftPatientCode ?? '',
+            medicalRecordCode: previousShiftMedicalRecordCode ?? '',
           }));
         };
 
@@ -307,6 +377,7 @@ export function BedRecordModal({
             const formattedPatientName =
               formatPatientName(form.patientName).trim() || null;
             const formattedPatientCode = resolvedPatientCode;
+            const formattedMedicalRecordCode = resolvedMedicalRecordCode;
             const formattedNote = form[noteKey].trim() || null;
             const body =
               shift === 'morning'
@@ -314,6 +385,7 @@ export function BedRecordModal({
                     bedId: bed.bedId,
                     morningPatientName: formattedPatientName,
                     morningPatientCode: formattedPatientCode,
+                    morningMedicalRecordCode: formattedMedicalRecordCode,
                     morningPulse: values.pulse,
                     morningTemp: values.temp,
                     morningBp: values.bp,
@@ -323,6 +395,7 @@ export function BedRecordModal({
                     bedId: bed.bedId,
                     eveningPatientName: formattedPatientName,
                     eveningPatientCode: formattedPatientCode,
+                    eveningMedicalRecordCode: formattedMedicalRecordCode,
                     eveningPulse: values.pulse,
                     eveningTemp: values.temp,
                     eveningBp: values.bp,
@@ -376,6 +449,15 @@ export function BedRecordModal({
                     · Mã NB{' '}
                     <span className="font-medium tabular-nums">
                       {previousShiftPatientCode}
+                    </span>
+                  </>
+                ) : null}
+                {previousShiftMedicalRecordCode ? (
+                  <>
+                    {' '}
+                    · Mã BA{' '}
+                    <span className="font-medium tabular-nums">
+                      {previousShiftMedicalRecordCode}
                     </span>
                   </>
                 ) : null}
@@ -447,7 +529,7 @@ export function BedRecordModal({
                     onChange={(e) =>
                       setForm((prev) => ({
                         ...prev,
-                        patientCode: formatPatientCodeInput(e.target.value),
+                        patientCode: formatDigitCodeInput(e.target.value),
                       }))
                     }
                     placeholder="Nhập mã bệnh nhân (tùy chọn)"
@@ -466,6 +548,51 @@ export function BedRecordModal({
                   Mã NB:{' '}
                   <span className="font-medium tabular-nums">
                     {resolvedPatientCode}
+                  </span>
+                  {continuingPatient ? (
+                    <span className="text-slate-500">
+                      {' '}
+                      · giữ mã từ ca trước
+                    </span>
+                  ) : null}
+                </p>
+              ) : null}
+
+              {showMedicalRecordCodeInput ? (
+                <div>
+                  <label
+                    htmlFor="medicalRecordCode"
+                    className="text-sm font-medium text-slate-700">
+                    Mã BA
+                  </label>
+                  <input
+                    id="medicalRecordCode"
+                    type="text"
+                    inputMode="numeric"
+                    value={form.medicalRecordCode}
+                    disabled={pending}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        medicalRecordCode: formatDigitCodeInput(e.target.value),
+                      }))
+                    }
+                    placeholder="Nhập mã bệnh án (tùy chọn)"
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm tabular-nums disabled:bg-slate-100"
+                  />
+                  <p className="mt-1 text-xs text-slate-500">
+                    {continuingPatient
+                      ? 'Có thể bổ sung mã BA cho đợt nằm viện hiện tại.'
+                      : 'Mỗi đợt nằm viện có một mã BA. Có thể bỏ trống và cập nhật sau.'}
+                  </p>
+                </div>
+              ) : null}
+
+              {!showMedicalRecordCodeInput && resolvedMedicalRecordCode ? (
+                <p className="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">
+                  Mã BA:{' '}
+                  <span className="font-medium tabular-nums">
+                    {resolvedMedicalRecordCode}
                   </span>
                   {continuingPatient ? (
                     <span className="text-slate-500">

@@ -34,6 +34,14 @@ export function EpisodeHeader({
             <span className="font-medium tabular-nums">{episode.patientCode}</span>
           </p>
         ) : null}
+        {episode.medicalRecordCode ? (
+          <p className="mt-1 text-sm text-slate-600">
+            Mã BA:{' '}
+            <span className="font-medium tabular-nums">
+              {episode.medicalRecordCode}
+            </span>
+          </p>
+        ) : null}
         <p className="mt-1 text-sm text-slate-600">
           {episode.bed.bedName} · Phòng{' '}
           {episode.bed.roomName}

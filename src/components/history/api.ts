@@ -11,6 +11,7 @@ export function getHistory(
     endDate: query.endDate,
     patientName: query.patientName,
     patientCode: query.patientCode,
+    medicalRecordCode: query.medicalRecordCode,
     bedId: query.bedId,
     limit: query.limit,
     offset: query.offset,

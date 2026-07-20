@@ -17,7 +17,7 @@ type VitalsSpreadsheetTableProps = {
   editableShift: VitalsShift;
   anchorDate: string;
   onCellClick: (bedId: string, shift: VitalsShift) => void;
-  onPatientClick: (bedId: string, patientName: string, anchorDate: string, patientCode?: string) => void;
+  onPatientClick: (bedId: string, patientName: string, anchorDate: string, patientCode?: string, medicalRecordCode?: string) => void;
   readOnly?: boolean;
 };
 
@@ -28,7 +28,7 @@ type ShiftTableProps = {
   editableShift: VitalsShift;
   anchorDate: string;
   onCellClick: (bedId: string, shift: VitalsShift) => void;
-  onPatientClick: (bedId: string, patientName: string, anchorDate: string, patientCode?: string) => void;
+  onPatientClick: (bedId: string, patientName: string, anchorDate: string, patientCode?: string, medicalRecordCode?: string) => void;
   readOnly?: boolean;
 };
 

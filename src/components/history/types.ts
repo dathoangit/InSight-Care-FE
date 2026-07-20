@@ -11,6 +11,7 @@ export type HistoryQuery = {
   endDate: string;
   patientName?: string;
   patientCode?: string;
+  medicalRecordCode?: string;
   bedId?: string;
   limit?: number;
   offset?: number;

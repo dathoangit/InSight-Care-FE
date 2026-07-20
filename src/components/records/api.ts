@@ -50,15 +50,17 @@ export function getPatientEpisode(
     bedId: query.bedId,
     patientName: query.patientName,
     patientCode: query.patientCode,
+    medicalRecordCode: query.medicalRecordCode,
     anchorDate: query.anchorDate,
   });
 }
 
 export function getPatientAdmissions(
   api: AuthenticatedApi,
-  patientCode: string,
+  query: { patientCode?: string; medicalRecordCode?: string },
 ): Promise<PatientAdmissionsResponse> {
   return api.get<PatientAdmissionsResponse>('/records/patient-admissions', {
-    patientCode,
+    patientCode: query.patientCode,
+    medicalRecordCode: query.medicalRecordCode,
   });
 }

@@ -45,6 +45,8 @@ Required variables:
 
 - `NEXT_PUBLIC_API_URL`: Backend base URL (example: `http://localhost:8081`)
 
+When calling the backend directly from the browser, the backend must allow CORS for the FE origin.
+
 ## Commands
 
 ```bash

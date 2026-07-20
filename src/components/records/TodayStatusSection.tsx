@@ -28,6 +28,7 @@ type TodayStatusSectionProps = {
     patientName: string,
     anchorDate: string,
     patientCode?: string,
+    medicalRecordCode?: string,
   ) => void;
 };
 

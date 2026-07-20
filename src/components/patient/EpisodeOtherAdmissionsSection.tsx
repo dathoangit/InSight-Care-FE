@@ -74,7 +74,7 @@ export function EpisodeOtherAdmissionsSection({
 
     const api = createAuthenticatedApi(token);
 
-    void getPatientAdmissions(api, patientCode)
+    void getPatientAdmissions(api, { patientCode })
       .then((result) => {
         if (!cancelled) {
           setData(result);
@@ -172,6 +172,7 @@ export function EpisodeOtherAdmissionsSection({
                 bedId: admission.bed.bedId,
                 patientName: data?.patientName ?? patientName,
                 patientCode,
+                medicalRecordCode: admission.medicalRecordCode ?? undefined,
                 anchorDate: admission.startDate,
               })
             }
@@ -186,6 +187,11 @@ export function EpisodeOtherAdmissionsSection({
                 {formatYmdDisplay(admission.endDate)}
               </span>
             </div>
+            {admission.medicalRecordCode ? (
+              <p className="mt-1 text-xs tabular-nums text-slate-500">
+                Mã BA: {admission.medicalRecordCode}
+              </p>
+            ) : null}
             <p className="mt-2 text-sm text-slate-600">
               {admission.totalDays} ngày · {admission.shiftsWithVitals} buổi có
               chỉ số

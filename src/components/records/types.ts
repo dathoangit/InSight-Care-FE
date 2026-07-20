@@ -9,9 +9,11 @@ export type DailyRecord = {
   bedId: string;
   morningPatientName: string | null;
   morningPatientCode: string | null;
+  morningMedicalRecordCode: string | null;
   morningPatientAdmissionId?: string | null;
   eveningPatientName: string | null;
   eveningPatientCode: string | null;
+  eveningMedicalRecordCode: string | null;
   eveningPatientAdmissionId?: string | null;
   morningPulse: number | null;
   morningTemp: number | null;
@@ -35,6 +37,7 @@ export type BedTodayStatus = {
   todayRecord: DailyRecord | null;
   yesterdayPatientName: string | null;
   yesterdayPatientCode: string | null;
+  yesterdayMedicalRecordCode: string | null;
 };
 
 export type VitalsShift = 'morning' | 'evening';
@@ -50,8 +53,10 @@ export type UpsertDailyRecordBody = {
   bedId: string;
   morningPatientName?: string | null;
   morningPatientCode?: string | null;
+  morningMedicalRecordCode?: string | null;
   eveningPatientName?: string | null;
   eveningPatientCode?: string | null;
+  eveningMedicalRecordCode?: string | null;
   morningPulse?: number | null;
   morningTemp?: number | null;
   morningBp?: string | null;
@@ -98,6 +103,7 @@ export type PatientEpisodeSummary = {
 export type PatientEpisodeResponse = {
   patientName: string;
   patientCode: string | null;
+  medicalRecordCode: string | null;
   bed: {
     bedId: string;
     bedName: string;
@@ -123,11 +129,13 @@ export type PatientEpisodeQuery = {
   bedId: string;
   patientName: string;
   patientCode?: string;
+  medicalRecordCode?: string;
   anchorDate: string;
 };
 
 export type PatientAdmissionItem = {
   bed: { bedId: string; bedName: string; roomName: string; floor: string };
+  medicalRecordCode: string | null;
   startDate: string;
   endDate: string;
   totalDays: number;
@@ -136,7 +144,7 @@ export type PatientAdmissionItem = {
 };
 
 export type PatientAdmissionsResponse = {
-  patientCode: string;
+  patientCode: string | null;
   patientName: string | null;
   totalAdmissions: number;
   admissions: PatientAdmissionItem[];

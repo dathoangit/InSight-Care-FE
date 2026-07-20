@@ -82,8 +82,15 @@ export function DashboardPage() {
     patientName: string,
     anchorDate: string,
     patientCode?: string,
+    medicalRecordCode?: string,
   ) => {
-    setPatientEpisodeTarget({ bedId, patientName, anchorDate, patientCode });
+    setPatientEpisodeTarget({
+      bedId,
+      patientName,
+      anchorDate,
+      patientCode,
+      medicalRecordCode,
+    });
   };
 
   const handleRecordSaved = (record: DailyRecord) => {
