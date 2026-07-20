@@ -3,6 +3,7 @@
   "name": "base-nextjs",
   "description": "Minimal Next.js Pages Router starter with Tailwind and API utilities.",
   "scripts": {
+    "deploy": "./deploy.sh",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
