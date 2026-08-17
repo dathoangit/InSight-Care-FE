@@ -17,7 +17,11 @@ next-env.d.ts
 
 .next
 .vercel
+dist/windows-offline/
+dist-offline/
+deployment/windows-offline/.cache/
 .env*.local
 .idea
 .env
+.env.production
 .env.local.example
