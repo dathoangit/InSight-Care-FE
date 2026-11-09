@@ -4,6 +4,7 @@ import { formatPatientName } from 'src/utils/format-patient-name';
 import { getZebraRowClass } from './floor-colors';
 import { formatBp, formatNote, formatPulse, formatTemp } from './format-vitals';
 import { NotePreviewModal } from './NotePreviewModal';
+import { getPreviousShiftPatientName } from './previous-patient';
 import { type BedTodayStatus } from './types';
 import {
   getBloodPressureAlertLevel,
@@ -31,9 +32,13 @@ type VitalsTableRowProps = {
 
 function PatientNameCell({
   patientName,
+  previousPatientName,
+  showPreviousHint,
   onPatientClick,
 }: {
   patientName: string | null | undefined;
+  previousPatientName: string | null;
+  showPreviousHint: boolean;
   onPatientClick: (name: string) => void;
 }) {
   const name = patientName?.trim();
@@ -49,6 +54,16 @@ function PatientNameCell({
         className="w-full truncate text-left text-[11px] font-medium text-blue-600 hover:text-blue-800 sm:text-sm">
         {formatPatientName(name)}
       </button>
+    );
+  }
+
+  if (showPreviousHint && previousPatientName) {
+    return (
+      <span
+        className="block w-full truncate text-left text-[11px] font-medium text-slate-400/70 sm:text-sm"
+        title={`BN liền trước: ${formatPatientName(previousPatientName)}`}>
+        {formatPatientName(previousPatientName)}
+      </span>
     );
   }
 
@@ -75,6 +90,7 @@ export function VitalsTableRow({
     shift === 'morning'
       ? record?.morningPatientName
       : record?.eveningPatientName;
+  const previousPatientName = getPreviousShiftPatientName(bed, shift);
   const patientCode =
     shift === 'morning'
       ? record?.morningPatientCode
@@ -176,6 +192,8 @@ export function VitalsTableRow({
       <td {...cellProps} className={`${defaultCellClass} text-left`}>
         <PatientNameCell
           patientName={patientName}
+          previousPatientName={previousPatientName}
+          showPreviousHint={!readOnly}
           onPatientClick={(name) =>
             onPatientClick(
               bed.bedId,

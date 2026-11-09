@@ -73,6 +73,10 @@ body {
 }
 
 @layer components {
+  .page-frame {
+    @apply mx-auto w-full max-w-[1400px] px-1 sm:px-4;
+  }
+
   .date-input-shell {
     width: 100%;
     min-width: 0;

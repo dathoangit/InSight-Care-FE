@@ -2,6 +2,7 @@ import type { AuthRole } from './types';
 
 export const HOME_PATH = '/';
 export const ADMIN_USERS_PATH = '/admin/users';
+export const ADMIN_LAYOUT_PATH = '/admin/layout';
 
 export function isAdmin(role: AuthRole | null | undefined): boolean {
   return role === 'ADMIN';

@@ -14,7 +14,7 @@ export function AppFooter() {
   return (
     <footer
       className={`print:hidden mt-auto w-full border-t ${APP_BRAND_THEME.footer.border} ${APP_BRAND_THEME.footer.bg} ${APP_BRAND_THEME.footer.text}`}>
-      <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 sm:py-5">
+      <div className="page-frame py-4 sm:py-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className={`space-y-1 text-sm ${APP_BRAND_THEME.footer.muted}`}>
             <p>

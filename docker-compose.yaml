@@ -2,8 +2,21 @@ services:
   frontend:
     build:
       context: .
-    env_file:
-      - .env
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:?Set NEXT_PUBLIC_API_URL}
+    image: insight-care-fe:latest
+    container_name: insight-care-fe
+    restart: unless-stopped
     ports:
-      - "${APP_PORT}:3000"
-    restart: always
+      - '${HOST_PORT:-3000}:3000'
+    logging:
+      driver: json-file
+      options:
+        max-size: '50m'
+        max-file: '3'
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:3000/']
+      interval: 30s
+      timeout: 5s
+      start_period: 40s
+      retries: 3

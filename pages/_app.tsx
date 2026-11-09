@@ -6,6 +6,7 @@ import type { AppProps } from 'next/app';
 import { AuthSessionManager } from 'src/auth/AuthSessionManager';
 import { AuthProvider, useAuth } from 'src/auth/context';
 import {
+  ADMIN_LAYOUT_PATH,
   ADMIN_USERS_PATH,
   getDefaultLandingPath,
   HOME_PATH,
@@ -13,8 +14,8 @@ import {
 } from 'src/auth/role-routing';
 import { AppShell } from 'src/components/shell/AppShell';
 
-const PROTECTED_PATHS = [HOME_PATH, ADMIN_USERS_PATH];
-const ADMIN_ONLY_PATHS = [ADMIN_USERS_PATH];
+const PROTECTED_PATHS = [HOME_PATH, ADMIN_USERS_PATH, ADMIN_LAYOUT_PATH];
+const ADMIN_ONLY_PATHS = [ADMIN_USERS_PATH, ADMIN_LAYOUT_PATH];
 const PUBLIC_PATHS = ['/login', '/404'];
 
 function isPathPublic(pathname: string): boolean {

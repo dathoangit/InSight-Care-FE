@@ -4,6 +4,7 @@
   "description": "Minimal Next.js Pages Router starter with Tailwind and API utilities.",
   "scripts": {
     "deploy": "./deploy.sh",
+    "deploy:ci": "./scripts/trigger-ci-tag.sh",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

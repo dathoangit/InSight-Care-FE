@@ -11,7 +11,11 @@ import { useRouter } from 'next/router';
 
 import { getUserAccountDetails } from 'src/auth/display-user';
 import { useAuth } from 'src/auth/context';
-import { ADMIN_USERS_PATH, isAdmin } from 'src/auth/role-routing';
+import {
+  ADMIN_LAYOUT_PATH,
+  ADMIN_USERS_PATH,
+  isAdmin,
+} from 'src/auth/role-routing';
 import { APP_DEFAULT_DEPARTMENT } from 'src/constants/branding';
 
 type UserAccountMenuProps = {
@@ -144,6 +148,11 @@ export function UserAccountMenu({ className = '' }: UserAccountMenuProps) {
     void router.push(ADMIN_USERS_PATH);
   };
 
+  const handleManageLayout = () => {
+    close();
+    void router.push(ADMIN_LAYOUT_PATH);
+  };
+
   const panel =
     open && panelStyle && typeof document !== 'undefined'
       ? createPortal(
@@ -181,13 +190,22 @@ export function UserAccountMenu({ className = '' }: UserAccountMenuProps) {
 
             <div className="mt-4 space-y-2 border-t border-slate-200 pt-4">
               {isAdmin(role) ? (
-                <button
-                  type="button"
-                  role="menuitem"
-                  onClick={handleManageAccounts}
-                  className="w-full rounded-lg border border-sky-200 bg-sky-50 px-4 py-2.5 text-sm font-semibold text-sky-800 transition hover:bg-sky-100">
-                  Quản lý tài khoản
-                </button>
+                <>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={handleManageLayout}
+                    className="w-full rounded-lg border border-sky-200 bg-sky-50 px-4 py-2.5 text-sm font-semibold text-sky-800 transition hover:bg-sky-100">
+                    Quản lý giường
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={handleManageAccounts}
+                    className="w-full rounded-lg border border-sky-200 bg-sky-50 px-4 py-2.5 text-sm font-semibold text-sky-800 transition hover:bg-sky-100">
+                    Quản lý tài khoản
+                  </button>
+                </>
               ) : null}
               <button
                 type="button"

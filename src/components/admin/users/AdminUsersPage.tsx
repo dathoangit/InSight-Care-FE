@@ -128,7 +128,7 @@ export function AdminUsersPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-3 py-4 sm:px-6 sm:py-6">
+    <div className="page-frame py-4 sm:py-6">
       <div className="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-semibold text-slate-900 sm:text-2xl">

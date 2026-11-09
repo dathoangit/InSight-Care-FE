@@ -105,7 +105,7 @@ export function DashboardPage() {
   const displayDate = selectedDate || serverDate;
 
   return (
-    <main className="mx-auto w-full min-w-0 max-w-[1400px] overflow-x-clip px-1 py-4 sm:px-4 sm:py-8">
+    <main className="page-frame min-w-0 overflow-x-clip py-4 sm:py-8">
       <div className="min-w-0 space-y-6">
         <TodayStatusSection
           data={data}

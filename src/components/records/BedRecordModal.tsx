@@ -7,6 +7,11 @@ import { formatPatientName } from 'src/utils/format-patient-name';
 import { type VitalsShift } from 'src/utils/date-vn';
 
 import { upsertRecord } from './api';
+import {
+  getPreviousShiftMedicalRecordCode,
+  getPreviousShiftPatientCode,
+  getPreviousShiftPatientName,
+} from './previous-patient';
 import { type BedTodayStatus, type DailyRecord } from './types';
 import { VitalsShiftFields } from './VitalsShiftFields';
 import {
@@ -39,43 +44,6 @@ type FormState = {
   eveningBp: string;
   eveningNote: string;
 };
-
-function getPreviousShiftPatientName(
-  bed: BedTodayStatus,
-  shift: VitalsShift,
-): string | null {
-  if (shift === 'evening') {
-    const name = bed.todayRecord?.morningPatientName?.trim();
-    return name || null;
-  }
-
-  const name = bed.yesterdayPatientName?.trim();
-  return name || null;
-}
-
-function getPreviousShiftPatientCode(
-  bed: BedTodayStatus,
-  shift: VitalsShift,
-): string | null {
-  if (shift === 'evening') {
-    const code = bed.todayRecord?.morningPatientCode?.trim();
-    return code || null;
-  }
-
-  return null;
-}
-
-function getPreviousShiftMedicalRecordCode(
-  bed: BedTodayStatus,
-  shift: VitalsShift,
-): string | null {
-  if (shift === 'evening') {
-    const code = bed.todayRecord?.morningMedicalRecordCode?.trim();
-    return code || null;
-  }
-
-  return null;
-}
 
 function formatDigitCodeInput(value: string): string {
   return value.replace(/\D/g, '').slice(0, 10);

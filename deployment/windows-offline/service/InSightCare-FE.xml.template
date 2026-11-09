@@ -1,0 +1,22 @@
+<service>
+  <id>InSightCare-FE</id>
+  <name>InSight Care Frontend</name>
+  <description>InSight Care Next.js frontend</description>
+  <executable>%BASE%\..\runtime\node.exe</executable>
+  <arguments>"%BASE%\server.js"</arguments>
+  <workingdirectory>%BASE%</workingdirectory>
+  <env name="NODE_ENV" value="production"/>
+  <env name="PORT" value="__FE_PORT__"/>
+  <env name="HOSTNAME" value="0.0.0.0"/>
+  <logpath>%BASE%\logs</logpath>
+  <log mode="roll">
+    <sizeThreshold>10240</sizeThreshold>
+    <keepFiles>8</keepFiles>
+  </log>
+  <onfailure action="restart" delay="5 sec"/>
+  <onfailure action="restart" delay="10 sec"/>
+  <onfailure action="restart" delay="30 sec"/>
+  <resetfailure>1 hour</resetfailure>
+  <stoptimeout>20 sec</stoptimeout>
+  <startmode>Automatic</startmode>
+</service>
